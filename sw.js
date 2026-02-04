@@ -1,7 +1,7 @@
-self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open("meteo-peche").then(cache =>
-      cache.addAll(["./", "./index.html", "./app.js"])
-    )
-  );
+self.addEventListener("install", event => {
+  console.log("Service Worker installé");
+});
+
+self.addEventListener("fetch", event => {
+  event.respondWith(fetch(event.request));
 });

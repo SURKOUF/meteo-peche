@@ -1,9 +1,8 @@
-async function loadData() {
-  const lat = 43.2965;   // Marseille (modifiable)
-  const lon = 5.3698;
+const weatherKey = "TA_CLE_OPENWEATHER";
+const tideKey = "TA_CLE_WORLDTIDES";
 
-  const weatherKey = "7baa39789a0f591884f58f73f4704172";
-  const tideKey = "c738ad96-27ec-4298-80bb-873d0bd8a67c";
+async function loadData(lat, lon) {
+  const output = document.getElementById("result");
 
   try {
     // 🌤 MÉTÉO
@@ -18,11 +17,11 @@ async function loadData() {
     );
     const tide = await tideRes.json();
 
-    const h1 = tide.heights[0].height;
-    const h2 = tide.heights[1].height;
+    const h1 = tide.heights[0]?.height ?? 0;
+    const h2 = tide.heights[1]?.height ?? 0;
     const tideTrend = h2 > h1 ? "Montante 🌊⬆️" : "Descendante 🌊⬇️";
 
-    // 🌕 LUNE (simple)
+    // 🌕 LUNE simple
     const day = new Date().getDate();
     const moon =
       day < 7 ? "Nouvelle lune 🌑" :
@@ -36,7 +35,8 @@ async function loadData() {
       score = "Excellent 🔥🎣";
     }
 
-    document.getElementById("result").innerHTML = `
+    output.innerHTML = `
+      📍 Position détectée<br><br>
       🌡 Température : ${weather.main.temp} °C<br>
       🌥 Conditions : ${weather.weather[0].description}<br><br>
       🌊 Marée : ${h1.toFixed(2)} m (${tideTrend})<br>
@@ -44,13 +44,35 @@ async function loadData() {
       🎣 Pêche : <strong>${score}</strong>
     `;
   } catch (e) {
-    document.getElementById("result").innerText = "Erreur de chargement ❌";
+    output.innerText = "❌ Erreur lors du chargement";
+    console.error(e);
   }
 }
 
-loadData();
+function getLocation() {
+  const output = document.getElementById("result");
 
-// Service Worker
+  if (!navigator.geolocation) {
+    output.innerText = "❌ GPS non supporté";
+    return;
+  }
+
+  output.innerText = "⏳ Recherche de la position...";
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      loadData(lat, lon);
+    },
+    error => {
+      output.innerText = "❌ GPS refusé ou indisponible";
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// Optionnel : service worker pour PWA
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+  navigator.serviceWorker.register("sw.js").catch(console.error);
 }
