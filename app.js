@@ -1,5 +1,6 @@
-const weatherKey = "TA_CLE_OPENWEATHER";
-const tideKey = "TA_CLE_WORLDTIDES";
+const weatherKey = "7baa39789a0f591884f58f73f4704172";
+const tideKey = "c738ad96-27ec-4298-80bb-873d0bd8a67c
+";
 
 async function loadData(lat, lon) {
   const output = document.getElementById("result");
